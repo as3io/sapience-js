@@ -17,12 +17,12 @@ module.exports = compose({
   },
   properties: {
     name: DEFAULT_TRACKER_NAME,
-    level: 4,
+    level: levels.error,
     enabled: true,
   },
   methods: {
     dispatch(level, ...args) {
-      const index = levels[level] || 4;
+      const index = levels[level] || levels.error;
       if (this.enabled && index >= this.level) {
         args.unshift(`${APP_NAME} Logger (${this.name}):`);
         // eslint-disable-next-line no-console
@@ -33,7 +33,7 @@ module.exports = compose({
       this.enabled = Boolean(bit);
     },
     setLevel(level) {
-      this.level = levels[level] || this.level;
+      this.level = levels[level] || levels.error;
     },
   },
 });
