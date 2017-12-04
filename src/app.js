@@ -8,8 +8,9 @@ const trackers = {};
  * Initializes a tracker, or runs a command on an initialized tracker.
  *
  * @todo Polyfill promises.
- * @param {string} command
- * @param {object} options
+ * @param {string} command The command name.
+ * @param {object} options The command options.
+ * @param {function} cb A callback function to executed on command success or failure.
  * @return {Promise}
  */
 module.exports = (command, options, cb) => {
