@@ -9,7 +9,7 @@ const levels = {
 };
 
 module.exports = compose({
-  init({ level, enabled, name }) {
+  init({ level, enabled, name } = {}) {
     this.stampType = 'logger';
     this.enable(enabled);
     this.setLevel(level);
