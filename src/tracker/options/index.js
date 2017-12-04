@@ -1,6 +1,6 @@
 const compose = require('stampit');
 const LoggerOptions = require('./logger');
-const { DEFAULT_TRACKER_NAME } = require('../../constants');
+const { DEFAULT_TRACKER_NAME } = require('sapience-core').constants;
 
 const { assign } = Object;
 

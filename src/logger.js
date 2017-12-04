@@ -1,5 +1,5 @@
 const compose = require('stampit');
-const { APP_NAME, DEFAULT_TRACKER_NAME } = require('./constants');
+const { APP_NAME, DEFAULT_TRACKER_NAME } = require('sapience-core').constants;
 
 const levels = {
   log: 1,

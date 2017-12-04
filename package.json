@@ -26,6 +26,7 @@
     "webpack-dev-server": "^2.9.4"
   },
   "dependencies": {
+    "sapience-core": "https://github.com/as3io/sapience-core.git#master",
     "stampit": "^4.0.2"
   }
 }

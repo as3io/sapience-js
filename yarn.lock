@@ -3594,6 +3594,12 @@ safe-buffer@5.1.1, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, s
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
 
+"sapience-core@https://github.com/as3io/sapience-core.git#master":
+  version "1.0.0"
+  resolved "https://github.com/as3io/sapience-core.git#d92b3c03999a8f2ecc6641674988ac56dfca78ac"
+  dependencies:
+    stampit "^4.0.2"
+
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"

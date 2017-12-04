@@ -1,7 +1,8 @@
 const compose = require('stampit');
 const Logger = require('../logger');
 const TrackerOptions = require('./options');
-const { APP_NAME } = require('../constants');
+const User = require('../user');
+const { APP_NAME } = require('sapience-core').constants;
 
 const commands = {};
 const { assign } = Object;

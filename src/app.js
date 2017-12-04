@@ -1,5 +1,5 @@
 const Tracker = require('./tracker');
-const { DEFAULT_TRACKER_NAME, APP_NAME } = require('./constants');
+const { DEFAULT_TRACKER_NAME, APP_NAME } = require('sapience-core').constants;
 
 const { assign } = Object;
 const trackers = {};

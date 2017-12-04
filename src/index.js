@@ -1,12 +1,12 @@
 require('./polyfills')();
-const { APP_NAME, WINDOW_VAR_NAME } = require('./constants');
+const { APP_NAME, WINDOW_VAR_NAME } = require('sapience-core').constants;
 const app = require('./app');
 
 // Find the command queue in the `window` object.
 const queueName = window[WINDOW_VAR_NAME];
 if (!queueName || !window[queueName]) {
   throw new Error(`No ${APP_NAME} object was found or initialized.
-   Was the proper JavaScript included on the page?`);
+  Was the proper JavaScript included on the page?`);
 }
 const commandQueue = window[queueName];
 
