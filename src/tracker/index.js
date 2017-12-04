@@ -29,6 +29,14 @@ const log = (logger, promise, command, opts) => {
 };
 
 module.exports = compose({
+  /**
+   * Initializes the tracker.
+   *
+   * @param {object} options
+   * @param {string} options.id The client identifier to use with this tracker.
+   * @param {string} options.name The tracker name
+   * @param {object} options.logger The logger options.
+   */
   init({ id, name, logger } = {}) {
     this.options = TrackerOptions({ id, name, logger });
     if (!this.options.id) {
