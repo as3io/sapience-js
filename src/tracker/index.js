@@ -1,19 +1,18 @@
 const compose = require('stampit');
 const Logger = require('../logger');
+const TrackerOptions = require('./options');
 const { APP_NAME } = require('../constants');
 
 const commands = {};
 const { assign } = Object;
 
 module.exports = compose({
-  init({ clientId, name }) {
-    if (!clientId) {
-      throw new Error(`No 'clientId' was provided to the ${APP_NAME} tracker named '${name}'`);
+  init({ id, name, logger } = {}) {
+    this.options = TrackerOptions({ id, name, logger });
+    if (!this.options.id) {
+      throw new Error(`No 'id' was provided to the ${APP_NAME} tracker named '${this.options.name}'`);
     }
-    this.clientId = clientId;
-    this.name = name;
-
-    this.logger = Logger(assign({}, { name, enabled: true, level: 'log' }));
+    this.logger = Logger(this.options.logger);
     this.logger.dispatch('log', 'Tracker initialized');
   },
   methods: {
@@ -44,7 +43,7 @@ module.exports = compose({
      */
     log(promise, command, opts) {
       const msg = stage => `Command execution ${stage} for '${command}'`;
-      this.logger.dispatch('info', msg('started'), opts);
+      this.logger.dispatch('log', msg('started'), opts);
       return promise.then((result) => {
         this.logger.dispatch('info', msg('complete'), result);
         return result;
