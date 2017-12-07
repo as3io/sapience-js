@@ -59,7 +59,7 @@ const StorageService = compose({
       if (json) {
         try {
           const parsed = JSON.parse(json);
-          if ((!parsed.v || !parsed.exp) || parsed.exp < (new Date()).valueOf()) {
+          if ((!parsed.v || !parsed.e) || parsed.e < (new Date()).valueOf()) {
             return undefined;
           }
           return parsed.v;
@@ -99,7 +99,7 @@ const StorageService = compose({
       if (!value) return this.remove(key);
 
       cookie.set(key, value, { expires });
-      if (storage()) storage().setItem(key, JSON.stringify({ v: value, exp: expires.valueOf() }));
+      if (storage()) storage().setItem(key, JSON.stringify({ v: value, e: expires.valueOf() }));
       return this;
     },
   },
