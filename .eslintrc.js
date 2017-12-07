@@ -3,5 +3,6 @@ module.exports = {
   globals: {
     window: true,
     document: true,
-  }
+    DOMException: true,
+  },
 };
