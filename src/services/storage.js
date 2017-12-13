@@ -1,108 +1,98 @@
 const compose = require('stampit');
-const cookie = require('js-cookie');
+const StorageInstance = require('../storage');
+const { STORAGE_PREFIX } = require('sapience-core').constants;
 
-/**
- * Determines if storage is currently available, enabled, and writeable.
- *
- * @param {string} type - The storage type
- * @return {boolean}
- */
-const storageAvailable = (type) => {
-  try {
-    const s = window[type];
-    const x = '__storage_test__';
-    s.setItem(x, x);
-    s.removeItem(x);
-    return true;
-  } catch (e) {
-    return e instanceof DOMException && (
-      // everything except Firefox
-      e.code === 22 ||
-      // Firefox
-      e.code === 1014 ||
-      // test name field too, because code might not be present
-      // everything except Firefox
-      e.name === 'QuotaExceededError' ||
-      // Firefox
-      e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-      // acknowledge QuotaExceededError only if there's something already stored
-      s.length !== 0; // eslint-disable-line no-undef
-  }
-};
+const createStorageKey = suffix => `${STORAGE_PREFIX}${suffix}`;
 
-/**
- * Gets a storage object from the window, based on type.
- * If storage is not available, will return `undefined`.
- *
- * @param {string} [type=localStorage] - The storage type.
- * @return {(WindowLocalStorage|WindowSessionStorage|undefined)}
- */
-const storage = (type = 'localStorage') => (storageAvailable(type) ? window[type] : undefined);
-
-const StorageService = compose({
+module.exports = compose({
+  /**
+   *
+   */
+  init() {
+    this.instances = [];
+  },
   methods: {
     /**
-     * Retrieves a value from storage.
-     * Will first attempt to find the value in a cookie.
-     * If not found, will attempt to retrieve it from `localStorage`.
-     * If `localStorage` is not supported, or the value is expired,
-     * will return undefined.
      *
-     * @param {string} key
-     * @return {(string|undefined)}
+     * @param {string} name
      */
-    get(key) {
-      if (!key) return undefined;
-      const value = cookie.get(key);
-      if (value || !storage()) return value;
-      const json = storage().getItem(key);
-      if (json) {
-        try {
-          const parsed = JSON.parse(json);
-          if ((!parsed.v || !parsed.e) || parsed.e < (new Date()).valueOf()) {
-            return undefined;
-          }
-          return parsed.v;
-        } catch (e) {
-          return undefined;
-        }
-      }
-      return undefined;
-    },
-
-    /**
-     * Removes a value from storage.
-     *
-     * @param {string} key
-     * @return {this}
-     */
-    remove(key) {
-      if (!key) return this;
-
-      cookie.remove(key);
-      if (storage()) storage().removeItem(key);
+    delete(name) {
+      this.instance(name).delete();
       return this;
     },
 
     /**
-     * Sets a value to storage.
-     * Will set to a cookie and to `localStorage`, if available.
-     * If the value is `falsey` will remove the value.
      *
-     * @param {string} key
-     * @param {*} value
-     * @param {Date} expires
-     * @return {this}
+     * @param {string} name
      */
-    set(key, value, expires) {
-      if (!key) return this;
-      if (!value) return this.remove(key);
+    exists(name) {
+      return this.instance(name).exists();
+    },
 
-      cookie.set(key, value, { expires });
-      if (storage()) storage().setItem(key, JSON.stringify({ v: value, e: expires.valueOf() }));
+    /**
+     *
+     * @param {string} name
+     */
+    instance(name) {
+      const instance = this.instances[name];
+      if (!instance) {
+        throw new Error(`The storage instance named '${name}' does not exist.`);
+      }
+      return instance;
+    },
+
+    /**
+     *
+     * @param {string} name
+     */
+    refresh(name) {
+      return this.instance(name).refresh();
+    },
+
+    /**
+     *
+     * @param {string} name
+     * @param {object} params
+     * @param {string} params.suffix The storage suffix.
+     * @param {number} params.ttl The time-to-live, in minutes.
+     * @param {string} [params.adapter=cascading] The storage adapter to use.
+     * @param {object} [params.options] The adapter options.
+     * @return {this}
+     * @throws {Error} If the suffix is empty.
+     */
+    register(name, {
+      suffix,
+      ttl,
+      adapter = 'Cascading',
+      options,
+    } = {}) {
+      if (!suffix) throw new Error('The storage suffix key cannot be empty.');
+      const key = createStorageKey(suffix);
+      this.instances[name] = StorageInstance({
+        key,
+        ttl,
+        adapter,
+        options,
+      });
+      return this;
+    },
+
+    /**
+     *
+     * @param {string} name
+     */
+    retrieve(name) {
+      return this.instance(name).retrieve();
+    },
+
+    /**
+     *
+     * @param {string} name
+     * @param {*} value
+     */
+    save(name, value) {
+      this.instance(name).save(value);
       return this;
     },
   },
 });
-
-module.exports = StorageService();

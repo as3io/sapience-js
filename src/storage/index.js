@@ -1,19 +1,24 @@
 const compose = require('stampit');
-const storage = require('./services/storage');
-const { STORAGE_PREFIX } = require('sapience-core').constants;
-
-const createStorageKey = suffix => `${STORAGE_PREFIX}${suffix}`;
+const adapters = require('./adapters');
 
 module.exports = compose({
   /**
    * @param {object} params
-   * @param {string} params.suffix The storage key suffix.
+   * @param {string} params.key The storage key.
    * @param {number} params.ttl The time-to-live, in minutes.
+   * @param {string} params.adapter The storage adapter to use.
+   * @param {object} [params.options] The adapter options.
    */
-  init({ suffix, ttl }) {
-    this.key = createStorageKey(suffix);
+  init({
+    key,
+    ttl,
+    adapter,
+    options,
+  }) {
+    this.key = key;
     this.ttl = ttl;
-    this.storage = storage;
+    if (!adapters[adapter]) throw new Error(`No adapter was found for '${adapter}'`);
+    this.adapter = adapters[adapter](options);
   },
   methods: {
     /**
@@ -22,7 +27,7 @@ module.exports = compose({
      * @return {this}
      */
     delete() {
-      this.storage.remove(this.key);
+      this.adapter.remove(this.key);
       return this;
     },
 
@@ -54,7 +59,7 @@ module.exports = compose({
      * @return {*}
      */
     retrieve() {
-      return this.storage.get(this.key);
+      return this.adapter.get(this.key);
     },
 
     /**
@@ -66,7 +71,7 @@ module.exports = compose({
     save(value) {
       // Convert the TTL (in minutes) to a date object.
       const expires = new Date((new Date()).valueOf() + (this.ttl * 60 * 1000));
-      this.storage.set(this.key, value, expires);
+      this.adapter.set(this.key, value, expires);
       return this;
     },
   },
