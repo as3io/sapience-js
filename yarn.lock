@@ -3600,10 +3600,11 @@ safe-buffer@5.1.1, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, s
 
 "sapience-core@https://github.com/as3io/sapience-core.git#master":
   version "1.0.0"
-  resolved "https://github.com/as3io/sapience-core.git#4b2c6ef6e667a9f4d30b1c5a41fd59a6392a9fb2"
+  resolved "https://github.com/as3io/sapience-core.git#6e719e52ad967f0f1250782cac79e5ee2ec41a9a"
   dependencies:
     no-case "^2.3.2"
     stampit "^4.0.2"
+    uuid "^3.1.0"
 
 select-hose@^2.0.0:
   version "2.0.0"
