@@ -11,6 +11,11 @@
       sapience('init', {
         id: 'foo',
         logger: { level: 'log' },
+        usr: { id: '50dc9d604f0df6097b000017', ns: 'fhc.merrick.user' },
+        // Or...
+        // usr: { id: '50dc9d604f0df6097b000017', ns: { z: 'fhc', b: 'merrick', n: 'user' } },
+        // usr: '50dc9d604f0df6097b000017*fhc.merrick.user',
+        // usr: ['50dc9d604f0df6097b000017', 'fhc', 'merrick', 'user'],
       });
     </script>
   </head>
