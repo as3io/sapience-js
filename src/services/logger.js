@@ -24,7 +24,7 @@ module.exports = compose({
     dispatch(level, ...args) {
       const index = levels[level] || levels.error;
       if (this.enabled && index >= this.level) {
-        args.unshift(`${APP_NAME} Logger (${this.name}):`);
+        args.unshift(`${APP_NAME} Logger (${this.name}) ${level}:`);
         // eslint-disable-next-line no-console
         console[level](...args);
       }

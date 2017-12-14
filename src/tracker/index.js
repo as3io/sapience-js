@@ -1,5 +1,5 @@
 const compose = require('stampit');
-const Logger = require('../logger');
+const Logger = require('../services/logger');
 const TrackerOptions = require('./options');
 const User = require('../user');
 const { APP_NAME } = require('sapience-core').constants;
@@ -33,18 +33,25 @@ module.exports = compose({
   /**
    * Initializes the tracker.
    *
-   * @param {object} options
-   * @param {string} options.id The client identifier to use with this tracker.
-   * @param {string} options.name The tracker name
-   * @param {object} options.logger The logger options.
+   * @param {object} param
+   * @param {string} param.id The client identifier to use with this tracker.
+   * @param {string} param.name The tracker name
+   * @param {object} param.logger The logger options.
+   * @param {(object|string|array)} [params.usr] Initializes the tracker with the provided
+   *                                             user context.
    */
-  init({ id, name, logger } = {}) {
+  init({
+    id,
+    name,
+    logger,
+    usr,
+  } = {}) {
     this.options = TrackerOptions({ id, name, logger });
     if (!this.options.id) {
       throw new Error(`No 'id' was provided to the ${APP_NAME} tracker named '${this.options.name}'`);
     }
     this.logger = Logger(this.options.logger);
-    this.logger.dispatch('log', 'Tracker initialized');
+    this.logger.dispatch('info', 'Tracker initialized');
   },
   methods: {
     /**

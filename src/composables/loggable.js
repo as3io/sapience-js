@@ -1,5 +1,5 @@
 const compose = require('stampit');
-const Logger = require('../logger');
+const Logger = require('../services/logger');
 
 const defaultLogger = Logger({ disbled: true });
 
