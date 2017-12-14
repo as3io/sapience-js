@@ -1,15 +1,17 @@
 const compose = require('stampit');
 const StorageInstance = require('../storage');
 const { STORAGE_PREFIX } = require('sapience-core').constants;
+const Loggable = require('../composables/loggable');
 
 const createStorageKey = suffix => `${STORAGE_PREFIX}${suffix}`;
 
-module.exports = compose({
+module.exports = compose(Loggable, {
   /**
    *
    */
   init() {
     this.instances = [];
+    this.logger.dispatch('log', 'Storage initialized');
   },
   methods: {
     /**
@@ -18,6 +20,7 @@ module.exports = compose({
      */
     delete(name) {
       this.instance(name).delete();
+      this.logger.dispatch('info', `Deleted '${name}' from storage`);
       return this;
     },
 
@@ -46,6 +49,7 @@ module.exports = compose({
      * @param {string} name
      */
     refresh(name) {
+      this.logger.dispatch('info', `Refreshed '${name}' in storage`);
       return this.instance(name).refresh();
     },
 
@@ -82,7 +86,9 @@ module.exports = compose({
      * @param {string} name
      */
     retrieve(name) {
-      return this.instance(name).retrieve();
+      const value = this.instance(name).retrieve();
+      this.logger.dispatch('info', `Retrieved '${name}' from storage`, value);
+      return value;
     },
 
     /**
@@ -92,6 +98,7 @@ module.exports = compose({
      */
     save(name, value) {
       this.instance(name).save(value);
+      this.logger.dispatch('info', `Saved '${name}' to storage`, value);
       return this;
     },
   },
