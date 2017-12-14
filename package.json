@@ -27,6 +27,7 @@
     "webpack-dev-server": "^2.9.4"
   },
   "dependencies": {
+    "eventemitter3": "^3.0.0",
     "js-cookie": "^2.2.0",
     "sapience-core": "https://github.com/as3io/sapience-core.git#master",
     "stampit": "^4.0.2",
