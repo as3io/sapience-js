@@ -1,7 +1,8 @@
 const compose = require('stampit');
 const Logger = require('../services/logger');
 const TrackerOptions = require('./options');
-const User = require('../user');
+const SessionManager = require('../user');
+const Emitter = require('../services/emitter');
 const { APP_NAME } = require('sapience-core').constants;
 
 const commands = {};
@@ -52,6 +53,9 @@ module.exports = compose({
     }
     this.logger = Logger(this.options.logger);
     this.logger.dispatch('info', 'Tracker initialized');
+
+    this.emitter = Emitter({ logger: this.logger });
+    this.manager = SessionManager({ usr, logger: this.logger, emitter: this.emitter });
   },
   methods: {
     /**
