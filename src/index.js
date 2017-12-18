@@ -13,6 +13,7 @@ const commandQueue = window[queueName];
 // Apply the queue to the app.
 const queue = commandQueue.q;
 if (Array.isArray(queue)) {
+  // @todo Create a command order object to fire commands in proper order: e.g. `on` `init` `*`
   // Find and send the init commands first, in case the user sent the commands out of order.
   queue.filter(args => args[0] === 'init').forEach(args => app(...args));
   // Send all other commands.

@@ -16,6 +16,9 @@ module.exports = (command, options) => new Promise((resolve, reject) => {
   const opts = assign({}, options);
   const cmd = String(command);
   if (cmd === 'init') {
+    // @todo Init should be it's own command module??
+    // @todo Ensure init can only be run once.
+    // @todo Fire init events
     // Create the tracker instance on init.
     const name = opts.name || DEFAULT_TRACKER_NAME;
     opts.name = name;

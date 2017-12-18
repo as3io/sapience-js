@@ -67,6 +67,8 @@ module.exports = compose({
      * @return {Promise} The command result.
      */
     execute(command, options) {
+      // @todo This should not assume an object of options, and should instead just spread
+      // arguments to the command handler.
       const opts = assign({}, Object(options));
       const promise = typeof commands[command] === 'function' ?
         Promise.resolve(commands[command](this, opts)) :

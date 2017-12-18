@@ -2,6 +2,8 @@
   <head>
     <title>Sapience Sandbox</title>
     <script>
+      // @todo The command queue should also proxy promises?
+      // How would that be accomplished without a global polyfill?
       (function(i, s, o, g, r, a, m) {
         i['SapienceObject'] = r;
         i[r] = i[r] || function() { (i[r].q = i[r].q || []).push(arguments) }
