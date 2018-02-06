@@ -1,5 +1,5 @@
 const compose = require('stampit');
-const { APP_NAME, DEFAULT_TRACKER_NAME } = require('sapience-core').constants;
+const { APP_NAME } = require('sapience-core').constants;
 
 const levels = {
   log: 1,
@@ -10,13 +10,11 @@ const levels = {
 
 module.exports = compose({
   init({ level, enabled, name } = {}) {
-    this.stampType = 'logger';
     this.enable(enabled);
     this.setLevel(level);
-    this.name = name || this.name;
+    this.name = name;
   },
   properties: {
-    name: DEFAULT_TRACKER_NAME,
     level: levels.error,
     enabled: true,
   },
@@ -33,7 +31,7 @@ module.exports = compose({
       this.enabled = Boolean(bit);
     },
     setLevel(level) {
-      this.level = levels[level] || levels.error;
+      this.level = levels[level] || levels.warn;
     },
   },
 });

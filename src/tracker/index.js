@@ -1,79 +1,99 @@
 const compose = require('stampit');
+const { DEFAULT_TRACKER_NAME } = require('sapience-core').constants;
 const Logger = require('../services/logger');
-const TrackerOptions = require('./options');
-const SessionManager = require('../user');
-const Emitter = require('../services/emitter');
-const { APP_NAME } = require('sapience-core').constants;
+// const Emitter = require('../services/emitter');
+const Session = require('./session');
+const resolvers = require('./resolvers');
+const { Promise } = require('es6-promise');
 
-const commands = {};
 const { assign } = Object;
-
-/**
- * Hooks into a command promise and logs the result or error.
- *
- * @todo Polyfill promises.
- * @param {Logger} logger
- * @param {Promise} promise
- * @param {string} command
- * @param {object} opts
- * @return {Promise}
- */
-const log = (logger, promise, command, opts) => {
-  const msg = stage => `Command execution ${stage} for '${command}'`;
-  logger.dispatch('log', msg('started'), opts);
-  return promise.then((result) => {
-    logger.dispatch('info', msg('complete'), result);
-    return result;
-  }).catch((error) => {
-    logger.dispatch('error', msg('error'), error);
-    return error;
-  });
-};
 
 module.exports = compose({
   /**
-   * Initializes the tracker.
    *
-   * @param {object} param
-   * @param {string} param.id The client identifier to use with this tracker.
-   * @param {string} param.name The tracker name
-   * @param {object} param.logger The logger options.
-   * @param {(object|string|array)} [params.usr] Initializes the tracker with the provided
-   *                                             user context.
+   * @param {object} params
    */
-  init({
-    id,
-    name,
-    logger,
-    usr,
-  } = {}) {
-    this.options = TrackerOptions({ id, name, logger });
-    if (!this.options.id) {
-      throw new Error(`No 'id' was provided to the ${APP_NAME} tracker named '${this.options.name}'`);
-    }
-    this.logger = Logger(this.options.logger);
-    this.logger.dispatch('info', 'Tracker initialized');
+  init({ id, name, debug = {} } = {}) {
+    this.name = name || DEFAULT_TRACKER_NAME;
+    if (!id) throw new Error(`The '${this.name}' tracker is missing the track id value.`);
+    this.id = id;
 
-    this.emitter = Emitter({ logger: this.logger });
-    this.manager = SessionManager({ usr, logger: this.logger, emitter: this.emitter });
+    this.logger = Logger(assign({}, debug, { name: this.name }));
+    // this.emitter = Emitter({ logger: this.logger });
+    this.session = Session({ logger: this.logger });
+    this.log('log', 'Tracker initialized.');
   },
+
+  /**
+   *
+   */
   methods: {
     /**
-     * Executes a tracker command.
+     * Executes a command by running its corresponding resolver function.
+     * If the resolver returns a non-Promise value, the command will resolve immediately.
+     * If the resolver returns a Promise, the command will be resolved once that Promise
+     * is fullfilled.
      *
-     * @todo Polyfill promises.
-     * @param {string} command The command name to execute.
-     * @param {object} options The command options.
-     * @return {Promise} The command result.
+     * If the resolver throws an `Error`, or otherwise has a Promise rejecton, the command
+     * will be rejected.
+     *
+     * The Tracker instance will be bound to each resolver as its `this` value.
+     *
+     * @param {string} name The command name - corresponds to a resolver function.
+     * @param {array} args The command args, which will be spread to the command.
+     * @returns {Promise}
      */
-    execute(command, options) {
-      // @todo This should not assume an object of options, and should instead just spread
-      // arguments to the command handler.
-      const opts = assign({}, Object(options));
-      const promise = typeof commands[command] === 'function' ?
-        Promise.resolve(commands[command](this, opts)) :
-        Promise.reject(new Error(`The command '${command}' was not found.`));
-      return log(this.logger, promise, command, opts);
+    resolve(name, ...args) {
+      const cmd = resolvers[name];
+      return new Promise((resolve, reject) => {
+        if (typeof cmd !== 'function') {
+          reject(new Error(`A command resolver for '${name}' was not found.`));
+        } else {
+          const resolver = cmd.bind(this);
+          try {
+            const value = resolver(...args);
+            resolve(value);
+          } catch (e) {
+            reject(e);
+          }
+        }
+      }).then((v) => {
+        this.log('info', `command '${name}' complete`, v);
+        return v;
+      }).catch((e) => {
+        this.log('error', `command '${name}' error`, e);
+      });
+    },
+
+    /**
+     *
+     * @param {string} eventName
+     * @param {array} args
+     */
+    emit(eventName, ...args) {
+      this.emitter.emit(eventName, ...args);
+    },
+
+    on(eventName, cb) {
+      this.emitter.on(eventName, cb);
+    },
+
+    once(eventName, cb) {
+      this.emitter.once(eventName, cb);
+    },
+
+    /**
+     *
+     * @param {string} level
+     * @param {array} args
+     */
+    log(level, ...args) {
+      this.logger.dispatch(level, ...args);
+    },
+
+    setLogging({ level = 'warn', enabled = true } = {}) {
+      this.logger.enable(enabled);
+      this.logger.setLevel(level);
     },
   },
 });

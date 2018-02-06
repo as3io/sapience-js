@@ -1,8 +1,8 @@
-require('./polyfills')();
 const { APP_NAME, WINDOW_VAR_NAME } = require('sapience-core').constants;
 const app = require('./app');
 
 // Find the command queue in the `window` object.
+// @todo Determine if this should use global/self.
 const queueName = window[WINDOW_VAR_NAME];
 if (!queueName || !window[queueName]) {
   throw new Error(`No ${APP_NAME} object was found or initialized.
@@ -13,12 +13,15 @@ const commandQueue = window[queueName];
 // Apply the queue to the app.
 const queue = commandQueue.q;
 if (Array.isArray(queue)) {
-  // @todo Create a command order object to fire commands in proper order: e.g. `on` `init` `*`
-  // Find and send the init commands first, in case the user sent the commands out of order.
-  queue.filter(args => args[0] === 'init').forEach(args => app(...args));
-  // Send all other commands.
-  queue.filter(args => args[0] !== 'init').forEach(args => app(...args));
+  const map = { t: 'then', c: 'catch', f: 'finally' };
+  queue.forEach((proxied) => {
+    // Convert the Arguments to an array and extract the command name.
+    const args = [...proxied.a];
+    const cmd = args.shift();
+    // Fire the command and apply/call the proxied promises.
+    const promise = app(cmd, ...args);
+    proxied.p.forEach(({ a, h }) => promise[map[h]].call(promise, ...a));
+  });
 }
 
-// Replace the queue with the app.
 window[queueName] = app;

@@ -1,44 +1,27 @@
-const Tracker = require('./tracker');
-const { DEFAULT_TRACKER_NAME, APP_NAME } = require('sapience-core').constants;
-
-const { assign } = Object;
-const trackers = {};
+const ProxyTracker = require('./tracker/proxy');
+const { DEFAULT_TRACKER_NAME } = require('sapience-core').constants;
 
 /**
- * Initializes a tracker, or runs a command on an initialized tracker.
+ * All named, registered tracker proxies.
+ */
+const proxies = {};
+
+/**
+ * Creates a Tracker instance, and runs the tracker command result.
  *
- * @todo Polyfill promises.
- * @param {string} command The command name.
- * @param {object} options The command options.
+ * @param {string} cmd The command name.
+ * @param {...array} args The command arguments.
  * @return {Promise}
  */
-module.exports = (command, options) => new Promise((resolve, reject) => {
-  const opts = assign({}, options);
-  const cmd = String(command);
-  if (cmd === 'init') {
-    // @todo Init should be it's own command module??
-    // @todo Ensure init can only be run once.
-    // @todo Fire init events
-    // Create the tracker instance on init.
-    const name = opts.name || DEFAULT_TRACKER_NAME;
-    opts.name = name;
-    if (!trackers[name]) {
-      // Only create the instance once.
-      try {
-        trackers[name] = Tracker(opts);
-        return resolve(trackers[name]);
-      } catch (e) {
-        return reject(e);
-      }
-    }
-    return resolve(trackers[name]);
+module.exports = (cmd, ...args) => {
+  // Determine the tracker name and command.
+  const parts = String(cmd).split('.', 2);
+  const name = (parts.length === 2) ? parts[0] || DEFAULT_TRACKER_NAME : DEFAULT_TRACKER_NAME;
+  const command = (parts.length === 2) ? parts[1] : parts[0];
+
+  if (!proxies[name]) {
+    proxies[name] = ProxyTracker({ name });
   }
-  // Delegate the command to the appropriate tracker.
-  const parts = cmd.split('.', 2);
-  const params = {
-    name: (parts.length === 2) ? parts[0] : DEFAULT_TRACKER_NAME,
-    command: (parts.length === 2) ? parts[1] : parts[0],
-  };
-  const tracker = trackers[params.name];
-  return tracker ? resolve(tracker.execute(params.command, opts)) : reject(new Error(`No ${APP_NAME} tracker named '${params.name}' was found.`));
-});
+  const proxy = proxies[name];
+  return proxy.execute(command, args);
+};
